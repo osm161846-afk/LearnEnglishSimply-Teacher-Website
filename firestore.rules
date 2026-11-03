@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isTeacher() {
+      return request.auth != null
+        && request.auth.token.email == 'to23454mas@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    match /videos/{videoId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isTeacher();
+    }
+    match /students/{studentId} {
+      allow read: if isTeacher() || (request.auth != null && request.auth.uid == studentId);
+      allow create, update: if request.auth != null && request.auth.uid == studentId;
+      allow delete: if false;
+    }
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow write: if isTeacher();
+    }
+  }
+}
